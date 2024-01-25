@@ -35,7 +35,7 @@ const courseSchema = mongoose.Schema({
         type:mongoose.Schema.Types.ObjectId,
         ref:"Tag",
     },
-    studentsEntrolled: [
+    studentsEnrolled: [
         {
             type:mongoose.Schema.Types.ObjectId,
             required:true,
