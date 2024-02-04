@@ -5,12 +5,12 @@ require('dotenv').config();
 // next ko me route me define krta hu
 
 // auth -> verify token
-exports.auth = async (req, res) => {
+exports.auth = async (req, res, next) => {
     try {
         // extract token
-        const token = req.cookies.token || req.body.token || req.header("Authorization").replace("Bearer ", "");
+        const token = req.cookies.token || req.body.token || req.header("Authorisation").replace("Bearer ", "");
 
-        // if token is missing
+        // if token is missing, then return response
         if(!token){
             return res.status(401).json({
                 success:false,
@@ -20,10 +20,11 @@ exports.auth = async (req, res) => {
 
         // verify token
         try {
-            const decode = await jwt.verify(token, process.env.SECRET_KEY);
+            const decode = jwt.verify(token, process.env.JWT_SECRET);
             console.log(decode);
             req.user = decode;
         } catch (error) {
+            //verification - issue
             return res.status(401).json({
                 success:false,
                 message:'Token is invalid'
@@ -48,11 +49,12 @@ exports.isStudent = async (req, res, next) => {
                 message:'This is a protected route for students only'
             })
         }
+        next();
     } catch (error) {
         console.log(error);
         return res.status(500).json({
             success:false,
-            message:'User role cannot be verified'
+            message:'User role cannot be verified, please try again'
         })
     }
 }
@@ -66,11 +68,12 @@ exports.isInstructor = async (req, res, next) => {
                 message:'This is a protected route for instructor only'
             })
         }
+        next();
     } catch (error) {
         console.log(error);
         return res.status(500).json({
             success:false,
-            message:'User role cannot be verified'
+            message:'User role cannot be verified, please try again'
         })
     }
 }
@@ -84,11 +87,12 @@ exports.isAdmin = async (req, res, next) => {
                 message:'This is a protected route for admin only'
             })
         }
+        next();
     } catch (error) {
         console.log(error);
         return res.status(500).json({
             success:false,
-            message:'User role cannot be verified'
+            message:'User role cannot be verified, please try again'
         })
     }
 }
