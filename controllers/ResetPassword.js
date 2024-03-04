@@ -1,6 +1,7 @@
 const User = require("../models/User");
 const mailSender = require("../utils/mailSender");
 const bcrypt = require('bcrypt');
+const crypto = require("crypto");
 require('dotenv').config();
 
 // resetPasswordToken
@@ -16,16 +17,15 @@ exports.resetPasswordToken = async (req, res) => {
       return res.status(401).json({
         // update status code correctly
         success: false,
-        message: `This Email: ${email} is not Registered With Us Enter a Valid Email `,
+        message: `This Email: ${email} is not Registered With Us. Enter a Valid Email `,
       });
     }
 
     // generate token
-    const token = crypto.randomUUID();
-    // const token = crypto.randomBytes(20).toString("hex");
+    const token = crypto.randomBytes(20).toString("hex");
 
     // update user by adding token and expiration time
-    const updatedDetails = User.findOneAndUpdate(
+    const updatedDetails = await User.findOneAndUpdate(
       { email: email },
       {
         token: token,
@@ -36,7 +36,9 @@ exports.resetPasswordToken = async (req, res) => {
     console.log("DETAILS", updatedDetails);
 
     // create url
-    const url = `http://localhost:3000/update-password/${token}`;
+    const url = `http://${process.env.API_URL}${process.env.PORT}/update-password/${token}`;
+
+    // console.log(url);
 
     // send mail containing the url
     await mailSender(
@@ -94,7 +96,7 @@ exports.resetPassword = async (req, res) => {
         }
 
         // hash password
-        const encryptedPassword = await bcrypt.hash(password, process.env.SALT_ROUNDS);
+        const encryptedPassword = await bcrypt.hash(password, 10);
 
         // password update
         await User.findOneAndUpdate(

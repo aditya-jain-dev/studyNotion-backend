@@ -21,7 +21,7 @@ exports.sendOTP = async (req, res) => {
     if (checkUserPresent) {
       return res.status(401).json({
         success: false,
-        message: "User already registered",
+        message: "User is Already registered",
       });
     }
 
@@ -47,7 +47,6 @@ exports.sendOTP = async (req, res) => {
             lowerCaseAlphabets: false,
             specialChars: false
         });
-        result = await OTP.findOne({otp: otp});
     }
 
     // create an entry in db for otp
@@ -73,7 +72,7 @@ exports.sendOTP = async (req, res) => {
 };
 
 // signup
-exports.signUp = async (req, res) => {
+exports.signup = async (req, res) => {
     try {
         // fetch data from req body
         const {
@@ -89,7 +88,7 @@ exports.signUp = async (req, res) => {
 
         // validate
         if(!firstName || !lastName || !email || !password || !confirmPassword || !otp){
-            return res.status(400).json({
+            return res.status(403).json({
                 success: false,
                 message: "All fields are required"
             })
@@ -133,7 +132,7 @@ exports.signUp = async (req, res) => {
         }
  
         // hash password
-        const hashedPassword = await bcrypt.hash(password, process.env.SALT_ROUNDS)
+        const hashedPassword = await bcrypt.hash(password, 10)
 
         // Create the user
 		let approved = "";
@@ -147,7 +146,7 @@ exports.signUp = async (req, res) => {
             contactNumber:null,
         })
 
-        const user = User.create({
+        const user = await User.create({
             firstName,
             lastName,
             email,
@@ -189,7 +188,7 @@ exports.login = async (req, res) => {
         }
 
         // check user exist or not
-        const user = await User.findOne({email}).populate("additonalDetails");
+        const user = await User.findOne({email}).populate("additionalDetails");
 
         if(!user){
             return res.status(401).json({
@@ -282,7 +281,7 @@ exports.changePassword = async (req, res) => {
         }
 
         // create hash
-        const hashedPassword = bcrypt.hash(newPassword, process.env.SALT_ROUNDS);
+        const hashedPassword = bcrypt.hash(newPassword, 10);
 
         // update password in db
         const updatedUserDetails = await User.findByIdAndUpdate(

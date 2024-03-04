@@ -32,11 +32,13 @@ exports.createCategory = async (req, res) => {
     }
 } 
 
-// explore krna hai isko ---------
-exports.showAllCategorys = async (req, res) => {
+exports.showAllCategories = async (req, res) => {
     try {
         // fech entry from db
-        const allCategorys = await Category.find({}, {name:true, description:true});
+        const allCategorys = await Category.find(
+			{}, 
+			{name:true, description:true}
+		);
 
         return res.status(200).json({
             success: true,
@@ -54,17 +56,19 @@ exports.showAllCategorys = async (req, res) => {
 
 exports.categoryPageDetails = async (req, res) => {
 	try {
+		// get category id
 		const { categoryId } = req.body;
 
 		// Get courses for the specified category
 		const selectedCategory = await Category.findById(categoryId)
 			.populate("courses")
 			.exec();
+
 		console.log(selectedCategory);
 
 		// Handle the case when the category is not found
 		if (!selectedCategory) {
-			console.log("Category not found.");
+			console.error("Category not found.");
 			return res.status(404).json(
                 { 
                     success: false, 
